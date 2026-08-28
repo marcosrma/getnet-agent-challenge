@@ -30,6 +30,11 @@ def chat(request: ChatRequest) -> ChatResponse:
             request.message,
             request.user_id,
         )
+    elif selected_agent == AgentType.GENERAL_SEARCH:
+        response = knowledge_agent.handle_general_search(
+            request.message,
+            request.user_id,
+        )
     else:
         response = knowledge_agent.handle(
             request.message,

@@ -1,13 +1,15 @@
 from openai import OpenAI
 
 from app.config import settings
+from app.tools.web_search import WebSearchProvider
 from app.rag.retriever import KnowledgeRetriever
 
 
 class KnowledgeAgent:
-    def __init__(self):
+    def __init__(self, web_search_provider=None):
         self.client = OpenAI(api_key=settings.openai_api_key)
         self.retriever = KnowledgeRetriever()
+        self.web_search = web_search_provider or WebSearchProvider()
 
     def handle(self, message: str, user_id: str) -> str:
         documents = self.retriever.retrieve(
@@ -75,5 +77,55 @@ class KnowledgeAgent:
                 f"- {source}"
                 for source in sources[:3]
             )
+
+        return answer
+
+    def handle_general_search(self, message: str, user_id: str) -> str:
+        results = self.web_search.search(message, max_results=5)
+        context_parts = []
+        sources = []
+
+        for index, result in enumerate(results, start=1):
+            url = result["url"]
+            context_parts.append(
+                f"[RESULT {index}]\n"
+                f"Title: {result['title']}\n"
+                f"URL: {url}\n"
+                f"Content:\n{result['content']}"
+            )
+
+            if url and url not in sources:
+                sources.append(url)
+
+        context = "\n\n".join(context_parts)
+        response = self.client.responses.create(
+            model=settings.openai_model,
+            input=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a general-purpose web research agent. "
+                        "Answer the user's question using only the web search results below.\n\n"
+                        "GROUNDING RULES:\n"
+                        "- Use only facts supported by the search results.\n"
+                        "- If the results are insufficient, say so clearly.\n"
+                        "- Do not invent facts or URLs.\n"
+                        "- Keep the answer concise and useful."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Question:\n{message}\n\n"
+                        f"Web search results:\n\n{context}"
+                    ),
+                },
+            ],
+        )
+
+        answer = response.output_text
+        if sources:
+            answer += "\n\nSources:\n"
+            answer += "\n".join(f"- {source}" for source in sources[:3])
 
         return answer

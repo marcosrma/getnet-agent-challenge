@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.agents.router import AgentType
-from app.main import app, router_agent
+from app.main import app, knowledge_agent, router_agent
 
 
 client = TestClient(app)
@@ -49,3 +49,30 @@ def test_chat_routes_to_customer_support(monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["agent"] == "customer_support"
+
+
+def test_chat_routes_general_search_to_web_search(monkeypatch):
+    monkeypatch.setattr(
+        router_agent,
+        "route",
+        lambda message: AgentType.GENERAL_SEARCH,
+    )
+    monkeypatch.setattr(
+        knowledge_agent,
+        "handle_general_search",
+        lambda message, user_id: "web result",
+    )
+
+    response = client.post(
+        "/chat",
+        json={
+            "message": "What's the weather today?",
+            "user_id": "cliente1988",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "response": "web result",
+        "agent": "general_search",
+    }
