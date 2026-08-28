@@ -1,10 +1,21 @@
 services:
-	api:
-		build: .
-		env_file:
-			- .env
-		ports:
-			- "8000:8000"
-		volumes:
-			- ./data/chroma:/app/data/chroma
-		restart: unless-stopped
+  rag-ingest:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./data/chroma:/app/data/chroma
+    command: ["python", "-m", "app.rag.ingest"]
+
+  api:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/chroma:/app/data/chroma
+    depends_on:
+      rag-ingest:
+        condition: service_completed_successfully
+    restart: unless-stopped

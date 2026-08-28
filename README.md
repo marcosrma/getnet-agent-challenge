@@ -72,17 +72,19 @@ ou `general_search`.
 ## Executar com Docker
 
 Configure o `.env` conforme descrito acima. Em uma instalação limpa, primeiro
-construa a imagem e execute a ingestão usando o volume persistente:
+construa e suba os serviços:
 
 ```bash
-docker compose build
-docker compose run --rm api python -m app.rag.ingest
-docker compose up
+docker compose up --build
 ```
 
-Depois acesse `http://localhost:8000`. O Compose expõe a porta `8000` e monta
-`./data/chroma` em `/app/data/chroma`, preservando a base vetorial entre
-reinicializações. Para executar em segundo plano:
+O serviço `rag-ingest` executa a ingestão automaticamente e só depois o serviço
+`api` é iniciado. Ambos compartilham `./data/chroma`, preservando a base vetorial
+entre reinicializações. A ingestão requer as duas chaves configuradas e acesso
+à internet.
+
+Depois acesse `http://localhost:8000`. O Compose expõe a porta `8000`. Para
+executar em segundo plano:
 
 ```bash
 docker compose up -d
