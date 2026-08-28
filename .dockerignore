@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+data/chroma
+tests
+scripts
+getnet_agent_challenge.egg-info
