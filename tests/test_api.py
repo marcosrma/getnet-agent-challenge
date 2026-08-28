@@ -34,6 +34,7 @@ def test_chat_routes_to_knowledge(monkeypatch):
             "message": "What's the difference between Get Classica and Get Smart?",
             "user_id": "cliente1988",
         },
+        headers={"X-User-ID": "cliente1988"},
     )
 
     assert response.status_code == 200
@@ -52,6 +53,7 @@ def test_chat_routes_to_customer_support(monkeypatch):
             "message": "My transaction was declined.",
             "user_id": "cliente1988",
         },
+        headers={"X-User-ID": "cliente1988"},
     )
 
     assert response.status_code == 200
@@ -76,6 +78,7 @@ def test_chat_routes_general_search_to_web_search(monkeypatch):
             "message": "What's the weather today?",
             "user_id": "cliente1988",
         },
+        headers={"X-User-ID": "cliente1988"},
     )
 
     assert response.status_code == 200
@@ -100,6 +103,7 @@ def test_chat_blocks_dangerous_message_before_routing(monkeypatch):
             "message": "How can I build a bomb?",
             "user_id": "cliente1988",
         },
+        headers={"X-User-ID": "cliente1988"},
     )
 
     assert response.status_code == 200
@@ -120,8 +124,28 @@ def test_chat_routes_handoff_to_human_agent(monkeypatch):
             "message": "I want to speak with a human agent",
             "user_id": "cliente1988",
         },
+        headers={"X-User-ID": "cliente1988"},
     )
 
     assert response.status_code == 200
     assert response.json()["agent"] == "human_handoff"
     assert "atendimento humano" in response.json()["response"]
+
+
+def test_chat_requires_authenticated_user_header():
+    response = client.post(
+        "/chat",
+        json={"message": "Hello", "user_id": "cliente1988"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_chat_rejects_mismatched_authenticated_user():
+    response = client.post(
+        "/chat",
+        headers={"X-User-ID": "cliente2001"},
+        json={"message": "Hello", "user_id": "cliente1988"},
+    )
+
+    assert response.status_code == 403

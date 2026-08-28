@@ -1,3 +1,4 @@
+import hashlib
 import re
 from dataclasses import dataclass
 from urllib.parse import urljoin, urlparse
@@ -160,8 +161,25 @@ def ingest_page(
         for item in embeddings_response.data
     ]
 
+    source_hash = hashlib.sha256(page.url.encode("utf-8")).hexdigest()
+    current_ids = {
+        f"{source_hash}-{index}"
+        for index in range(len(chunks))
+    }
+    existing = collection.get(
+        where={"source": page.url},
+        include=[],
+    )
+    stale_ids = [
+        item_id
+        for item_id in existing.get("ids", [])
+        if item_id not in current_ids
+    ]
+    if stale_ids:
+        collection.delete(ids=stale_ids)
+
     ids = [
-        f"{abs(hash(page.url))}-{index}"
+        f"{source_hash}-{index}"
         for index in range(len(chunks))
     ]
 

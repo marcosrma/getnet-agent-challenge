@@ -1,6 +1,6 @@
 import time
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.responses import Response
 
@@ -8,6 +8,7 @@ from app.agents.customer_support import CustomerSupportAgent
 from app.agents.handoff import HumanHandoffAgent
 from app.agents.knowledge import KnowledgeAgent
 from app.agents.router import AgentType, RouterAgent
+from app.config import settings
 from app.guardrails import check_message
 from app.models.schemas import ChatRequest, ChatResponse
 from app.observability import logger, record_chat_request
@@ -35,12 +36,27 @@ def metrics():
 
 
 @app.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest) -> ChatResponse:
+def chat(
+    request: ChatRequest,
+    authenticated_user_id: str | None = Header(default=None, alias="X-User-ID"),
+) -> ChatResponse:
     started_at = time.perf_counter()
     agent = "unknown"
     status = "error"
 
     try:
+        if settings.require_user_authentication and not authenticated_user_id:
+            raise HTTPException(
+                status_code=401,
+                detail="X-User-ID header is required.",
+            )
+
+        if authenticated_user_id and authenticated_user_id != request.user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="Authenticated user does not match user_id.",
+            )
+
         guardrail_result = check_message(request.message)
 
         if not guardrail_result.allowed:

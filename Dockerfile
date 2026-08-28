@@ -7,6 +7,7 @@ WORKDIR /app
 
 COPY pyproject.toml README.md ./
 COPY app ./app
+COPY data/customers.json ./data/customers.json
 
 RUN pip install --no-cache-dir .
 

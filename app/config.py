@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     openai_api_key: str
     tavily_api_key: str = ""
+    require_user_authentication: bool = True
     openai_model: str = "gpt-5-mini"
 
     embedding_model: str = "text-embedding-3-small"

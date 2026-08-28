@@ -17,7 +17,11 @@ roteamento especializado e grounding explícito.
 cp .env.example .env
 ```
 
-Preencha `OPENAI_API_KEY` e `TAVILY_API_KEY` no arquivo `.env`.
+Preencha `OPENAI_API_KEY` e `TAVILY_API_KEY` no arquivo `.env`. Por padrão,
+`REQUIRE_USER_AUTHENTICATION=true` exige o header `X-User-ID` nas chamadas de
+chat. O valor precisa corresponder ao `user_id` do payload. Em uma aplicação
+real, esse header deve ser produzido por uma camada de autenticação, e não
+informado diretamente pelo cliente final.
 
 Instale o projeto e as dependências:
 
@@ -38,7 +42,9 @@ python -m app.rag.ingest
 ```
 
 O processo requer acesso à internet e consome chamadas da API de embeddings.
-Execute-o novamente quando quiser atualizar o conteúdo indexado.
+Execute-o novamente quando quiser atualizar o conteúdo indexado. Os IDs dos
+chunks são determinísticos e chunks antigos da mesma URL são removidos quando
+o conteúdo é atualizado.
 
 ## Executar a API
 
@@ -53,6 +59,7 @@ Exemplo de conversa:
 
 ```bash
 curl -X POST http://localhost:8000/chat \
+	-H 'X-User-ID: cliente1988' \
 	-H 'Content-Type: application/json' \
 	-d '{"message":"Qual a diferença entre Get Clássica e Get Smart?","user_id":"cliente1988"}'
 ```
@@ -68,6 +75,9 @@ Resposta:
 
 O campo `agent` identifica a rota escolhida: `knowledge`, `customer_support`
 ou `general_search`.
+
+O endpoint retorna `401` sem `X-User-ID` e `403` quando o header não corresponde
+ao `user_id` enviado.
 
 ## Executar com Docker
 

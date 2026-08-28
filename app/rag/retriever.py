@@ -14,7 +14,7 @@ class KnowledgeRetriever:
             path=settings.vector_db_path
         )
 
-        self.collection = self.chroma_client.get_collection(
+        self.collection = self.chroma_client.get_or_create_collection(
             name="getnet_knowledge"
         )
 
