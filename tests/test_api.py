@@ -13,7 +13,7 @@ def test_health_check():
     assert response.json() == {"status": "ok"}
 
 
-def test_chat():
+def test_chat_routes_to_knowledge():
     response = client.post(
         "/chat",
         json={
@@ -23,5 +23,4 @@ def test_chat():
     )
 
     assert response.status_code == 200
-    assert response.json()["agent"] == "router"
-    assert "Received:" in response.json()["response"]
+    assert response.json()["agent"] == "knowledge"
