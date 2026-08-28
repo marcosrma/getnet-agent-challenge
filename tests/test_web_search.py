@@ -1,6 +1,15 @@
+import pytest
 from unittest.mock import MagicMock
 
 from app.tools.web_search import WebSearchProvider
+
+
+def test_web_search_propagates_tavily_failure():
+    client = MagicMock()
+    client.search.side_effect = RuntimeError("Tavily unavailable")
+
+    with pytest.raises(RuntimeError, match="Tavily unavailable"):
+        WebSearchProvider(client=client).search("weather")
 
 
 def test_web_search_uses_tavily_and_normalizes_results():

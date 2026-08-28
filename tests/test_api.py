@@ -13,12 +13,12 @@ def test_health_check():
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
-    def test_metrics_endpoint_exposes_prometheus_metrics():
-        response = client.get("/metrics")
+def test_metrics_endpoint_exposes_prometheus_metrics():
+    response = client.get("/metrics")
 
-        assert response.status_code == 200
-        assert "chat_requests_total" in response.text
-        assert "chat_request_duration_seconds" in response.text
+    assert response.status_code == 200
+    assert "chat_requests_total" in response.text
+    assert "chat_request_duration_seconds" in response.text
 
 
 def test_chat_routes_to_knowledge(monkeypatch):
