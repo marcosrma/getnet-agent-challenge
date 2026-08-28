@@ -54,3 +54,36 @@ def test_router_falls_back_when_llm_fails(monkeypatch):
     )
 
     assert result == AgentType.CUSTOMER_SUPPORT
+
+def test_router_uses_llm_for_general_search(monkeypatch):
+    router = RouterAgent()
+
+    fake_response = MagicMock()
+    fake_response.output_parsed.agent = AgentType.GENERAL_SEARCH
+
+    monkeypatch.setattr(
+        router.client.responses,
+        "parse",
+        MagicMock(return_value=fake_response),
+    )
+
+    result = router.route(
+        "What's the weather forecast in Porto Alegre tomorrow?"
+    )
+
+    assert result == AgentType.GENERAL_SEARCH
+
+def test_router_fallback_routes_general_question_to_search(monkeypatch):
+    router = RouterAgent()
+
+    monkeypatch.setattr(
+        router.client.responses,
+        "parse",
+        MagicMock(side_effect=Exception("API unavailable")),
+    )
+
+    result = router.route(
+        "What's the euro exchange rate today?"
+    )
+
+    assert result == AgentType.GENERAL_SEARCH

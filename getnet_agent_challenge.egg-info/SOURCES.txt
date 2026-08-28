@@ -21,4 +21,6 @@ getnet_agent_challenge.egg-info/dependency_links.txt
 getnet_agent_challenge.egg-info/requires.txt
 getnet_agent_challenge.egg-info/top_level.txt
 tests/test_api.py
+tests/test_customer_support.py
+tests/test_customer_tools.py
 tests/test_router.py
