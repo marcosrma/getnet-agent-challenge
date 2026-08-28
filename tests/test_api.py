@@ -98,3 +98,23 @@ def test_chat_blocks_dangerous_message_before_routing(monkeypatch):
     assert response.status_code == 200
     assert response.json()["agent"] == "guardrails"
     assert "Não posso ajudar" in response.json()["response"]
+
+
+def test_chat_routes_handoff_to_human_agent(monkeypatch):
+    monkeypatch.setattr(
+        router_agent,
+        "route",
+        lambda message: AgentType.HUMAN_HANDOFF,
+    )
+
+    response = client.post(
+        "/chat",
+        json={
+            "message": "I want to speak with a human agent",
+            "user_id": "cliente1988",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["agent"] == "human_handoff"
+    assert "atendimento humano" in response.json()["response"]

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.agents.customer_support import CustomerSupportAgent
+from app.agents.handoff import HumanHandoffAgent
 from app.agents.knowledge import KnowledgeAgent
 from app.agents.router import AgentType, RouterAgent
 from app.guardrails import check_message
@@ -15,6 +16,7 @@ app = FastAPI(
 router_agent = RouterAgent()
 knowledge_agent = KnowledgeAgent()
 customer_support_agent = CustomerSupportAgent()
+human_handoff_agent = HumanHandoffAgent()
 
 
 @app.get("/health")
@@ -41,6 +43,11 @@ def chat(request: ChatRequest) -> ChatResponse:
         )
     elif selected_agent == AgentType.GENERAL_SEARCH:
         response = knowledge_agent.handle_general_search(
+            request.message,
+            request.user_id,
+        )
+    elif selected_agent == AgentType.HUMAN_HANDOFF:
+        response = human_handoff_agent.handle(
             request.message,
             request.user_id,
         )

@@ -10,6 +10,7 @@ class AgentType(str, Enum):
     KNOWLEDGE = "knowledge"
     CUSTOMER_SUPPORT = "customer_support"
     GENERAL_SEARCH = "general_search"
+    HUMAN_HANDOFF = "human_handoff"
 
 
 class RoutingDecision(BaseModel):
@@ -45,6 +46,10 @@ class RouterAgent:
                         "- General-purpose questions that are not about Getnet and may require "
                         "current external information, such as weather, exchange rates, news, "
                         "or other web information.\n\n"
+
+                        "human_handoff:\n"
+                        "- Requests to speak with a human agent, supervisor, or attendant, "
+                        "or explicit requests to escalate a complaint or unresolved case.\n\n"
 
                         "Return exactly one destination."
                     ),
@@ -88,6 +93,24 @@ class RouterAgent:
             "crediário",
             "pix",
         ]
+
+        handoff_keywords = [
+            "talk to a human",
+            "speak to a human",
+            "human agent",
+            "live agent",
+            "supervisor",
+            "atendente",
+            "atendimento humano",
+            "falar com uma pessoa",
+            "falar com humano",
+            "ouvidoria",
+            "escalar",
+            "escalate",
+        ]
+
+        if any(keyword in text for keyword in handoff_keywords):
+            return AgentType.HUMAN_HANDOFF
 
         if any(keyword in text for keyword in support_keywords):
             return AgentType.CUSTOMER_SUPPORT

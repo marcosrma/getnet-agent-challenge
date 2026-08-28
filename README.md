@@ -103,6 +103,8 @@ RouterAgent (OpenAI Structured Output)
 		+--> general_search   --> KnowledgeAgent --> Tavily --> OpenAI
 		|
 		+--> customer_support --> CustomerSupportAgent --> ferramentas locais --> OpenAI
+		|
+		+--> human_handoff   --> HumanHandoffAgent --> encaminhamento transparente
 ```
 
 ### RouterAgent
@@ -131,6 +133,14 @@ ferramentas disponíveis são:
 
 O `user_id` autenticado é sempre aplicado pelo servidor antes da execução da
 ferramenta, impedindo que o modelo consulte dados de outro cliente.
+
+### HumanHandoffAgent
+
+Atende pedidos explícitos para falar com uma pessoa, supervisor ou ouvidoria.
+Essa rota não afirma ter aberto um chamado nem executa ações que não existem:
+ela informa que o caso deve ser encaminhado para um atendente humano. Em uma
+integração de produção, esse ponto pode publicar um evento em um sistema de
+atendimento ou criar um ticket usando uma ferramenta autenticada.
 
 ### Guardrails
 

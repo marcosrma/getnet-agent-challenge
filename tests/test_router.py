@@ -87,3 +87,17 @@ def test_router_fallback_routes_general_question_to_search(monkeypatch):
     )
 
     assert result == AgentType.GENERAL_SEARCH
+
+
+def test_router_fallback_routes_handoff_request_to_human(monkeypatch):
+    router = RouterAgent()
+
+    monkeypatch.setattr(
+        router.client.responses,
+        "parse",
+        MagicMock(side_effect=Exception("API unavailable")),
+    )
+
+    result = router.route("I want to speak with a human agent")
+
+    assert result == AgentType.HUMAN_HANDOFF
