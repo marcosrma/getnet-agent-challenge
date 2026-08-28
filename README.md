@@ -132,6 +132,13 @@ ferramentas disponíveis são:
 O `user_id` autenticado é sempre aplicado pelo servidor antes da execução da
 ferramenta, impedindo que o modelo consulte dados de outro cliente.
 
+### Guardrails
+
+Antes do roteamento, a API verifica mensagens em busca de conteúdo perigoso,
+tentativas de obter segredos ou dados de terceiros e instruções para ignorar
+as regras internas do sistema. Mensagens bloqueadas retornam `agent:
+guardrails` e não acionam OpenAI, Tavily ou ferramentas de cliente.
+
 ## Testes
 
 Execute:

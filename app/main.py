@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.agents.customer_support import CustomerSupportAgent
 from app.agents.knowledge import KnowledgeAgent
 from app.agents.router import AgentType, RouterAgent
+from app.guardrails import check_message
 from app.models.schemas import ChatRequest, ChatResponse
 
 
@@ -23,6 +24,14 @@ def health_check():
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
+    guardrail_result = check_message(request.message)
+
+    if not guardrail_result.allowed:
+        return ChatResponse(
+            response=guardrail_result.reason or "Não posso atender a essa solicitação.",
+            agent="guardrails",
+        )
+
     selected_agent = router_agent.route(request.message)
 
     if selected_agent == AgentType.CUSTOMER_SUPPORT:
