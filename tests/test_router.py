@@ -1,26 +1,54 @@
+from unittest.mock import MagicMock
+
 from app.agents.router import AgentType, RouterAgent
 
 
-router = RouterAgent()
+def test_router_uses_llm_for_knowledge(monkeypatch):
+    router = RouterAgent()
 
+    fake_response = MagicMock()
+    fake_response.output_parsed.agent = AgentType.KNOWLEDGE
 
-def test_routes_product_question_to_knowledge():
+    monkeypatch.setattr(
+        router.client.responses,
+        "parse",
+        MagicMock(return_value=fake_response),
+    )
+
     result = router.route(
-        "What's the difference between the Get Classica and Get Smart?"
+        "What's the difference between Get Classica and Get Smart?"
     )
 
     assert result == AgentType.KNOWLEDGE
 
 
-def test_routes_customer_problem_to_support():
+def test_router_uses_llm_for_customer_support(monkeypatch):
+    router = RouterAgent()
+
+    fake_response = MagicMock()
+    fake_response.output_parsed.agent = AgentType.CUSTOMER_SUPPORT
+
+    monkeypatch.setattr(
+        router.client.responses,
+        "parse",
+        MagicMock(return_value=fake_response),
+    )
+
     result = router.route(
-        "My card machine won't connect to the internet."
+        "When will the money from yesterday's sales be deposited?"
     )
 
     assert result == AgentType.CUSTOMER_SUPPORT
 
+def test_router_falls_back_when_llm_fails(monkeypatch):
+    router = RouterAgent()
 
-def test_routes_transaction_issue_to_support():
+    monkeypatch.setattr(
+        router.client.responses,
+        "parse",
+        MagicMock(side_effect=Exception("API unavailable")),
+    )
+
     result = router.route(
         "My transaction was declined."
     )

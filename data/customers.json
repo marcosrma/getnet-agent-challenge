@@ -1,0 +1,28 @@
+{
+  "cliente1988": {
+    "name": "João Silva",
+    "segment": "SMB",
+    "settlement": {
+      "last_sale_date": "2026-08-27",
+      "expected_deposit_date": "2026-08-28",
+      "status": "scheduled"
+    },
+    "terminal": {
+      "id": "POS-12345",
+      "status": "online"
+    }
+  },
+  "cliente2001": {
+    "name": "Maria Souza",
+    "segment": "Enterprise",
+    "settlement": {
+      "last_sale_date": "2026-08-27",
+      "expected_deposit_date": "2026-08-29",
+      "status": "pending"
+    },
+    "terminal": {
+      "id": "POS-99881",
+      "status": "offline"
+    }
+  }
+}
